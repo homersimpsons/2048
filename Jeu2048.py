@@ -1,4 +1,3 @@
-#!/usr/bin/python2.7
 # -*-coding:Utf-8 -*
 
 import random
@@ -9,9 +8,9 @@ class Grille:
 	def __init__(self):
 		"""fonction d'initialisation de la grille """
 		self.tab = array([["      ","      ","      ","      "]
-			,["      ","      ","      ","      "]
-			,["      ","      ","      ","      "]
-			,["      ","      ","      ","      "]])
+						 ,["      ","      ","      ","      "]
+						 ,["      ","      ","      ","      "]
+						 ,["      ","      ","      ","      "]])
 		self.score = 0
 
 	def initGrille(self):
@@ -47,7 +46,6 @@ class Grille:
 			val = random.choice(["    2 ","    2 ","    2 ","    2 ","    2 ","    2 ","    2 ","    2 ","    2 ","    4 "])
 
 		while boolean:
-			#print "oh shit"
 			i = random.randint(0,4)
 			j = random.randint(0,4)
 			if self.tab[i][j] == "      ":
@@ -73,30 +71,20 @@ class Grille:
 
 	def compresserList(self, liste):
 		"""Fonction qui gère la compression d'une liste """
-		boolPasCompre = True
-		i = 0
-		while i < 4:
-			
+		for i in range (len(liste)-1, -1, -1):
 			if liste[i] == "      ":
-				i += 1
-			else:
-				if i != 0 :
-					if liste[i-1] == "      ":
-						liste[i-1] = liste[i]
-						liste[i] = "      "
-						i = i - 1 
-					elif liste[i-1] == liste[i] and boolPasCompre:
-						res = int(liste[i]) + int(liste[i-1])
-						self.score += res
-						liste[i-1] = self.format(res)
-						liste[i] = "      "
-						i += 1
-						boolPasCompre = False
-						
-					else:
-						i += 1
-				else:
-					i += 1
+				liste[i:len(liste)-1] = liste[i+1:]
+				liste[len(liste)-1] = "      "
+		score = 0
+		for i in range (len(liste)-1):
+			if liste[i] != "      " and liste[i] == liste [i+1]:
+				self.score += 2 * int(liste[i])
+				liste[i] = self.format(2 * int(liste[i]))
+				liste[i+1] = "      "
+		for i in range (len(liste)-1, -1, -1):
+			if liste[i] == "      ":
+				liste[i:len(liste)-1] = liste[i+1:]
+				liste[len(liste)-1] = "      "
 		return liste
 	
 
@@ -104,16 +92,12 @@ class Grille:
 		"""Permet de définir le sens de compression """
 		isListeNOk = True
 		listTemp = liste.copy()
-		
 		if boolReverse :
 			self.InverseListe(self.compresserList(self.InverseListe(liste)))
 		else :
 			self.compresserList(liste)
-
 		for elt in (listTemp==liste) :
 			isListeNOk *= elt
-			
-
 		return isListeNOk,liste
 
 	def jouerCoup(self, coup):
@@ -136,36 +120,31 @@ class Grille:
 				isListNOk,self.tab[:,i] = self.preCompresser(self.tab[:,i], True)
 				isMoveNOk *= isListNOk
 		else:
-			print "Coup inconu"
+			print ("Coup inconu")
 
 		return isMoveNOk
 
 	def InverseListe(self, liste):
 		"""Fonction qui inverse l'ordre des valeurs d'une liste donnée en paramètre"""
-		i,j = liste[0],liste[1]
-		liste[0] = liste[3]
-		liste[1] = liste[2]
-		liste[2] = j
-		liste[3] = i
-
+		liste = liste[::-1]
 		return liste
 
 	def jouer(self):
 		"""Main de notre jeu"""
-		print "\n\nBonjour et bienvenue dans ce merveilleux programme du 2048 ! "
+		print ("\n\nBonjour et bienvenue dans ce merveilleux programme du 2048 ! ")
 		self.initGrille()
-		print self.AfficherGrille()
-		saisi = raw_input("Jouer un coup N/S/E/W (q pour quitter): ")
+		print (self.AfficherGrille())
+		saisi = input("Jouer un coup N/S/E/W (q pour quitter): ")
 		while saisi.lower() != 'q' and not self.a2048():
 			CoupNOK = self.jouerCoup(saisi.upper())
 			if CoupNOK:
-				print "Coup Impossible!!!"
+				print ("Coup Impossible!!!")
 			else:
 				self.ajoutAlea(1)
-			print self.AfficherGrille()
-			saisi = raw_input("Jouer un coup N/S/E/W (q pour quitter): ")
-			print "saisi : " + saisi
-		print "Au revoir"
+			print (self.AfficherGrille())
+			saisi = input("Jouer un coup N/S/E/W (q pour quitter): ")
+			print ("saisi : " + saisi)
+		print ("Au revoir")
 
 	def a1024(self):
 		"""Fonction permettant de savoir si la grille à un tuile 1024"""
@@ -200,12 +179,10 @@ class Grille:
 
 	def a8192(self):
 		"""Fonction permettant de savoir si la grille à un tuile 8192"""
-		boolean = False
 		for i in range(0,4):
 			for j in range(0,4):
 				if self.tab[i][j] == " 8192 ":
-					boolean = True
-
+					return True
 		return boolean
 
 	def gameOver(self):
@@ -230,13 +207,13 @@ class Grille:
 
 	def asMove(self):
 		"""Permet de donner les coup autorisaer """
-		boolean = True
 		grilleTemp = Grille()
 		listeCoup = ["N","S","E","W"]
 		for coup in listeCoup:
 			grilleTemp.tab = self.tab.copy()
-			boolean *= grilleTemp.jouerCoup(coup)
-		return not boolean
+			if not(grilleTemp.jouerCoup(coup)):
+				return True
+		return False
 
 	def val(self,x,y):
 		if self.tab[x][y] =="      ":
@@ -244,7 +221,6 @@ class Grille:
 		else:
 			return int(self.tab[x][y])
 
-"""grille = Grille()
-grille.initGrille()
-grille.jouer()"""
+grille = Grille()
+grille.jouer()
 
